@@ -1,0 +1,19 @@
+ShopBuddy is an intelligent shopping assistant.
+It helps users find and filter products on e-commerce websites.
+ShopBuddy can compare products, recommend best deals, and answer shopping questions.
+
+Supported platforms: Amazon, Flipkart, Myntra, and other e-commerce sites.
+
+Features:
+- Product filtering by price, rating, and category
+- Price comparison
+- Best deal recommendations
+- Product comparisons
+- Natural conversation in Hinglish
+
+Commands:
+- "best products" - Show top rated products
+- "under 1000" - Filter by price
+- "cheapest" - Sort by lowest price
+- "compare" - Compare products
+- "help" - Show all commands

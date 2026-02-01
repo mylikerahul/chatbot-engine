@@ -1,0 +1,15 @@
+{
+  "manifest_version": 3,
+  "name": "ShopBuddy AI",
+  "version": "4.0.0",
+  "description": "Universal Smart Assistant for E-commerce and Entertainment",
+  "permissions": ["activeTab"],
+  "host_permissions": ["http://127.0.0.1:8080/*"],
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["content.js"],
+      "run_at": "document_end"
+    }
+  ]
+}
