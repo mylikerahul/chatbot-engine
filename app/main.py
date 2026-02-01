@@ -7,6 +7,7 @@ import uvicorn
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
+# Adjust imports to use app package
 from app.core.config import get_settings
 from app.core.logger import Logger
 from app.api.routes import router
@@ -57,8 +58,6 @@ async def shutdown_event():
 
 
 if __name__ == "__main__":
-    logger.info("Starting server...")
-    
     uvicorn.run(
         "main:app",
         host=settings.host,

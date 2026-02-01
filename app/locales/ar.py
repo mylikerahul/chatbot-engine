@@ -1,100 +1,88 @@
 """
-German language translations.
+Arabic language translations.
 """
 
-GERMAN = {
+ARABIC = {
     "meta": {
-        "code": "de",
-        "name": "German",
-        "native_name": "Deutsch",
-        "direction": "ltr"
+        "code": "ar",
+        "name": "Arabic",
+        "native_name": "العربية",
+        "direction": "rtl"
     },
-    
     "greetings": {
-        "hello": "Hallo! Ich bin ShopBuddy, Ihr intelligenter Einkaufsassistent. Wie kann ich Ihnen heute helfen?",
-        "welcome": "Willkommen! Ich kann Ihnen helfen, Produkte zu finden, Preise zu vergleichen und Empfehlungen zu erhalten.",
-        "good_morning": "Guten Morgen! Bereit, Ihnen beim Einkaufen zu helfen.",
-        "good_afternoon": "Guten Tag! Was suchen Sie heute?",
-        "good_evening": "Guten Abend! Lassen Sie mich Ihnen helfen, das zu finden, was Sie brauchen."
+        "hello": "مرحباً! أنا ShopBuddy",
+        "welcome": "أهلاً وسهلاً!",
+        "good_morning": "صباح الخير!",
+        "good_afternoon": "مساء الخير!",
+        "good_evening": "مساء الخير!"
     },
-    
     "farewells": {
-        "bye": "Auf Wiedersehen! Viel Spaß beim Einkaufen!",
-        "see_you": "Bis bald! Kommen Sie jederzeit wieder.",
-        "take_care": "Passen Sie auf sich auf! Ich hoffe, ich konnte helfen."
+        "bye": "مع السلامة!",
+        "see_you": "إلى اللقاء!",
+        "take_care": "اعتني بنفسك!"
     },
-    
     "thanks": {
-        "welcome": "Gern geschehen! Brauchen Sie noch etwas?",
-        "glad_to_help": "Freut mich, dass ich helfen konnte! Noch etwas?",
-        "my_pleasure": "Mit Vergnügen! Lassen Sie mich wissen, wenn Sie weitere Hilfe benötigen."
+        "welcome": "على الرحب والسعة!",
+        "glad_to_help": "سعيد للمساعدة!",
+        "my_pleasure": "من دواعي سروري!"
     },
-    
     "help": {
-        "intro": "Das kann ich für Sie tun:",
+        "intro": "يمكنني مساعدتك في:",
         "commands": [
-            "**Produktsuche**: 'zeige beste Produkte', 'bestbewertete Artikel'",
-            "**Preisfilter**: 'unter 1000', 'über 5000', 'zwischen 500 und 2000'",
-            "**Sortierung**: 'günstigste zuerst', 'bestbewertet', 'teuerste'",
-            "**Vergleichen**: 'vergleiche Top 3', 'welches ist besser'",
-            "**Zusammenfassen**: 'fasse diese Seite zusammen', 'was ist auf dieser Seite'"
+            "البحث عن المنتجات",
+            "مقارنة الأسعار",
+            "فلترة النتائج"
         ],
-        "tip": "Schreiben Sie einfach natürlich - ich verstehe Konversationsanfragen!"
+        "tip": "اكتب ما تبحث عنه!"
     },
-    
     "products": {
-        "found": "{count} Artikel gefunden:",
-        "no_items": "Keine Artikel auf dieser Seite gefunden.",
-        "filtered": "{count} Artikel nach Ihren Kriterien gefiltert:",
-        "top_rated": "Bestbewertete Produkte:",
-        "cheapest": "Günstigste Optionen:",
-        "expensive": "Premium-Auswahl:",
-        "recommendation": "Basierend auf Bewertungen und Preis empfehle ich:",
-        "compare_header": "Vergleich der ausgewählten Artikel:",
-        "price": "Preis",
-        "rating": "Bewertung",
-        "no_match": "Keine Produkte entsprechen Ihren Filtern. Versuchen Sie andere Kriterien."
+        "found": "تم العثور على {count} منتج:",
+        "no_items": "لا توجد منتجات.",
+        "filtered": "النتائج المفلترة:",
+        "top_rated": "الأعلى تقييماً:",
+        "cheapest": "الأرخص:",
+        "expensive": "الأغلى:",
+        "recommendation": "أوصي بـ:",
+        "compare_header": "مقارنة:",
+        "price": "السعر",
+        "rating": "التقييم",
+        "no_match": "لا توجد نتائج مطابقة."
     },
-    
     "filters": {
-        "applied": "Angewandte Filter: {filters}",
-        "under": "Unter {amount}",
-        "above": "Über {amount}",
-        "between": "Zwischen {min} und {max}",
-        "sorted_by_price_asc": "Nach Preis sortiert (aufsteigend)",
-        "sorted_by_price_desc": "Nach Preis sortiert (absteigend)",
-        "sorted_by_rating": "Nach Bewertung sortiert (beste zuerst)"
+        "applied": "فلاتر:",
+        "under": "أقل من {amount}",
+        "above": "أكثر من {amount}",
+        "between": "بين {min} و {max}",
+        "sorted_by_price_asc": "السعر: من الأقل للأعلى",
+        "sorted_by_price_desc": "السعر: من الأعلى للأقل",
+        "sorted_by_rating": "التقييم: الأفضل أولاً"
     },
-    
     "errors": {
-        "no_products_page": "Ich sehe keine Produkte auf dieser Seite. Bitte navigieren Sie zu einer Produktlistenseite.",
-        "connection_failed": "Verbindung fehlgeschlagen. Stellen Sie sicher, dass der Server läuft.",
-        "ai_unavailable": "KI-Dienst vorübergehend nicht verfügbar. Verwende Basisantworten.",
-        "unknown_query": "Ich bin nicht sicher, ob ich das verstehe. Könnten Sie das umformulieren?",
-        "try_again": "Etwas ist schief gelaufen. Bitte versuchen Sie es erneut."
+        "no_products_page": "لا توجد منتجات في هذه الصفحة.",
+        "connection_failed": "فشل الاتصال.",
+        "ai_unavailable": "الخدمة غير متاحة حالياً.",
+        "unknown_query": "لم أفهم ذلك.",
+        "try_again": "حاول مرة أخرى."
     },
-    
     "site_messages": {
-        "detected": "Erkannt: {site}",
-        "items_found": "{count} Artikel auf dieser Seite gefunden",
-        "no_items_found": "Keine Artikel auf dieser Seite erkannt",
-        "page_type": "Seitentyp: {type}",
-        "navigate_suggestion": "Navigieren Sie zu einer Produktlistenseite für bessere Ergebnisse."
+        "detected": "الموقع: {site}",
+        "items_found": "تم العثور على {count} عنصر",
+        "no_items_found": "لم يتم العثور على عناصر",
+        "page_type": "نوع الصفحة: {type}",
+        "navigate_suggestion": "انتقل لصفحة المنتجات."
     },
-    
     "actions": {
-        "show_all": "Alle Anzeigen",
-        "best_rated": "Bestbewertet",
-        "cheapest": "Günstigste",
-        "summarize": "Zusammenfassen",
-        "compare": "Vergleichen",
-        "clear": "Chat Löschen"
+        "show_all": "عرض الكل",
+        "best_rated": "الأفضل تقييماً",
+        "cheapest": "الأرخص",
+        "summarize": "ملخص",
+        "compare": "مقارنة",
+        "clear": "مسح"
     },
-    
     "ui": {
-        "placeholder": "Fragen Sie mich alles...",
-        "send": "Senden",
-        "typing": "Denke nach...",
-        "powered_by": "Powered by ShopBuddy AI"
+        "placeholder": "اكتب هنا...",
+        "send": "إرسال",
+        "typing": "يكتب...",
+        "powered_by": "ShopBuddy AI"
     }
 }
