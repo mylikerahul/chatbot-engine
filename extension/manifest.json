@@ -1,8 +1,16 @@
 {
   "manifest_version": 3,
-  "name": "ShopBuddy AI",
+  "name": "ShopBuddy AI 🤖",
   "version": "4.0.0",
-  "description": "Universal Smart Assistant for E-commerce and Entertainment",
+  "description": "Your Universal AI Shopping & Entertainment Assistant 🛒✨ | Powered by Advanced AI for Smarter Online Shopping, Content Discovery & Deals Analysis",
+  "author": "Rahul Sharma",
+  "developer": {
+    "name": "Rahul Sharma",
+    "github": "mylikerahul",
+    "instagram": "mylikerahul",
+    "linkedin": "mylikerahul",
+    "facebook": "mylikerahul"
+  },
   "permissions": ["activeTab"],
   "host_permissions": ["http://127.0.0.1:8080/*"],
   "content_scripts": [
