@@ -1,81 +1,80 @@
-"""
-Professional logging system with structured output.
-Provides consistent logging across all services.
-"""
-
 import logging
 import sys
 from datetime import datetime
 from typing import Optional
 from app.core.config import get_settings
 
+class ANSIColor:
+    DEBUG = "\033[36m"
+    INFO = "\033[32m"
+    WARNING = "\033[33m"
+    ERROR = "\033[31m"
+    CRITICAL = "\033[35m"
+    RESET = "\033[0m"
 
-class LogFormatter(logging.Formatter):
-    """Custom formatter with color support for console output."""
-    
-    COLORS = {
-        "DEBUG": "\033[36m",
-        "INFO": "\033[32m",
-        "WARNING": "\033[33m",
-        "ERROR": "\033[31m",
-        "CRITICAL": "\033[35m",
-        "RESET": "\033[0m"
-    }
-    
+    @classmethod
+    def get(cls, level_name: str) -> str:
+        return getattr(cls, level_name, cls.RESET)
+
+class ConsoleFormatter(logging.Formatter):
     def format(self, record: logging.LogRecord) -> str:
         timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-        level = record.levelname
-        color = self.COLORS.get(level, self.COLORS["RESET"])
-        reset = self.COLORS["RESET"]
+        color = ANSIColor.get(record.levelname)
+        reset = ANSIColor.RESET
         
-        message = f"[{timestamp}] {color}{level:8}{reset} | {record.name} | {record.getMessage()}"
+        message = f"[{timestamp}] {color}{record.levelname:8}{reset} | {record.name} | {record.getMessage()}"
         
         if record.exc_info:
             message += f"\n{self.formatException(record.exc_info)}"
         
         return message
 
+class LogConfig:
+    """
+    Configuration manager for logging. 
+    Allows setting up global handlers once.
+    """
+    _setup_done = False
 
-class Logger:
-    """
-    Singleton logger class providing consistent logging interface.
-    """
-    
-    _instances: dict = {}
-    
-    def __new__(cls, name: str = "shopbuddy") -> "Logger":
-        if name not in cls._instances:
-            instance = super().__new__(cls)
-            instance._initialize(name)
-            cls._instances[name] = instance
-        return cls._instances[name]
-    
-    def _initialize(self, name: str) -> None:
-        self._name = name
-        self._logger = logging.getLogger(name)
-        
+    @classmethod
+    def setup(cls):
+        if cls._setup_done:
+            return
+
         settings = get_settings()
-        self._logger.setLevel(getattr(logging, settings.log_level.upper()))
+        root_logger = logging.getLogger()
+        root_logger.setLevel(getattr(logging, settings.log_level.upper()))
         
-        if not self._logger.handlers:
+        if not root_logger.handlers:
             handler = logging.StreamHandler(sys.stdout)
-            handler.setFormatter(LogFormatter())
-            self._logger.addHandler(handler)
-    
-    def debug(self, message: str, **kwargs) -> None:
+            handler.setFormatter(ConsoleFormatter())
+            root_logger.addHandler(handler)
+        
+        cls._setup_done = True
+
+class AppLogger:
+    """
+    Wrapper around Python's native logger to provide a consistent interface.
+    """
+    def __init__(self, name: str = "shopbuddy"):
+        # Ensure configuration is applied globally at least once
+        LogConfig.setup()
+        self._logger = logging.getLogger(name)
+
+    def debug(self, message: str, **kwargs):
         self._logger.debug(message, **kwargs)
-    
-    def info(self, message: str, **kwargs) -> None:
+
+    def info(self, message: str, **kwargs):
         self._logger.info(message, **kwargs)
-    
-    def warning(self, message: str, **kwargs) -> None:
+
+    def warning(self, message: str, **kwargs):
         self._logger.warning(message, **kwargs)
-    
-    def error(self, message: str, **kwargs) -> None:
+
+    def error(self, message: str, **kwargs):
         self._logger.error(message, **kwargs)
-    
-    def critical(self, message: str, **kwargs) -> None:
+
+    def critical(self, message: str, **kwargs):
         self._logger.critical(message, **kwargs)
-    
-    def exception(self, message: str, **kwargs) -> None:
+
+    def exception(self, message: str, **kwargs):
         self._logger.exception(message, **kwargs)

@@ -1,7 +1,6 @@
 /**
- * ShopBuddy AI Assistant v7.1.0
- * Clean macOS-Style UI - Light Theme (White Focus)
- * Production Ready - RESPONSIVE FIX
+ * ShopBuddy AI Assistant v8.0.0
+ * Clean Architecture - Fully Object-Oriented
  */
 
 (function() {
@@ -10,141 +9,79 @@
     if (window.ShopBuddyInjected) return;
     window.ShopBuddyInjected = true;
 
-    // ═══════════════════════════════════════════════════════════════
-    // CONFIGURATION
-    // ═══════════════════════════════════════════════════════════════
-    
-    const CONFIG = Object.freeze({
-        API_URL: "http://127.0.0.1:8080/chat",
-        VERSION: "7.1.0",
-        MAX_ITEMS: 50,
-        CACHE_DURATION: 5 * 60 * 1000
-    });
+    class Config {
+        static API_URL = "http://127.0.0.1:8080/chat";
+        static VERSION = "8.0.0";
+        static MAX_ITEMS = 50;
+        static CACHE_DURATION = 5 * 60 * 1000;
+        
+        static VALIDATION = {
+            minTitleLength: 20,
+            maxTitleLength: 250,
+            minWords: 3,
+            minScore: 40,
+            minPrice: 50,
+            maxPrice: 10000000
+        };
+        
+        static BLACKLIST_PATTERNS = [
+            /^continue\s*shopping/i, /^create\s*(a\s*)?account/i, /^sign\s*(in|up)/i,
+            /^log\s*in/i, /^register/i, /^explore\s*all/i, /^see\s*(more|all)/i,
+            /^view\s*(all|more|details|offer)/i, /^show\s*more/i, /^load\s*more/i,
+            /^shop\s*now/i, /^buy\s*now/i, /^add\s*to\s*(cart|basket|bag)/i,
+            /^subscribe/i, /^learn\s*more/i, /^read\s*more/i, /^click\s*here/i,
+            /^get\s*started/i, /^join\s*(now|prime)/i, /^try\s*(prime|now|free)/i,
+            /^deals?$/i, /^offers?$/i, /^sale$/i, /^new$/i, /^trending$/i,
+            /^popular$/i, /^featured$/i, /^sponsored$/i, /^advertisement/i,
+            /^home$/i, /^cart$/i, /^wishlist/i, /^account/i, /^orders?$/i,
+            /^help$/i, /^contact/i, /^about/i, /^categories/i, /^deliver\s*to/i,
+            /^hello,?\s*select/i, /^returns/i, /^today'?s?\s*deals/i,
+            /^customer\s*service/i, /^gift\s*cards?/i, /^sell$/i, /^all$/i,
+            /^amazon/i, /^back\s*to\s*top/i, /^up\s*to\s*\d+%\s*off$/i,
+            /^save\s*\d+%/i, /^flat\s*\d+%/i, /^\d+%\s*off$/i,
+            /^great\s*indian/i, /^prime\s*(day|deal)/i, /^lightning\s*deal/i,
+            /^deal\s*of\s*the\s*day/i, /^trending\s*(now|deal)/i,
+            /^emerging\s*business/i, /^become\s*a\s*seller/i,
+            /^download\s*app/i, /^free\s*delivery/i, /^no\s*cost\s*emi/i,
+            /^bank\s*offer/i, /^cashback/i, /^[a-z]{1,12}$/i,
+            /^[\d%₹$\s,\.]+$/, /^\s*$/, /^[^a-zA-Z]*$/,
+            /^shop\s*by\s*category/i, /^top\s*categories/i,
+            /^customers\s*also/i, /^you\s*may\s*also/i
+        ];
+    }
 
-    // ═══════════════════════════════════════════════════════════════
-    // PAGE TYPES
-    // ═══════════════════════════════════════════════════════════════
-    
-    const PageType = Object.freeze({
-        HOMEPAGE: 'homepage',
-        SEARCH: 'search',
-        PRODUCT: 'product',
-        CATEGORY: 'category',
-        UNKNOWN: 'unknown'
-    });
+    class PageType {
+        static HOMEPAGE = 'homepage';
+        static SEARCH = 'search';
+        static PRODUCT = 'product';
+        static CATEGORY = 'category';
+        static UNKNOWN = 'unknown';
+    }
 
-    // ═══════════════════════════════════════════════════════════════
-    // BLACKLIST PATTERNS - Filter fake items
-    // ═══════════════════════════════════════════════════════════════
-    
-    const BLACKLIST_PATTERNS = [
-        /^continue\s*shopping/i,
-        /^create\s*(a\s*)?account/i,
-        /^sign\s*(in|up)/i,
-        /^log\s*in/i,
-        /^register/i,
-        /^explore\s*all/i,
-        /^see\s*(more|all)/i,
-        /^view\s*(all|more|details|offer)/i,
-        /^show\s*more/i,
-        /^load\s*more/i,
-        /^shop\s*now/i,
-        /^buy\s*now/i,
-        /^add\s*to\s*(cart|basket|bag)/i,
-        /^subscribe/i,
-        /^learn\s*more/i,
-        /^read\s*more/i,
-        /^click\s*here/i,
-        /^get\s*started/i,
-        /^join\s*(now|prime)/i,
-        /^try\s*(prime|now|free)/i,
-        /^deals?$/i,
-        /^offers?$/i,
-        /^sale$/i,
-        /^new$/i,
-        /^trending$/i,
-        /^popular$/i,
-        /^featured$/i,
-        /^sponsored$/i,
-        /^advertisement/i,
-        /^home$/i,
-        /^cart$/i,
-        /^wishlist/i,
-        /^account/i,
-        /^orders?$/i,
-        /^help$/i,
-        /^contact/i,
-        /^about/i,
-        /^categories/i,
-        /^deliver\s*to/i,
-        /^hello,?\s*select/i,
-        /^returns/i,
-        /^today'?s?\s*deals/i,
-        /^customer\s*service/i,
-        /^gift\s*cards?/i,
-        /^sell$/i,
-        /^all$/i,
-        /^amazon/i,
-        /^back\s*to\s*top/i,
-        /^up\s*to\s*\d+%\s*off$/i,
-        /^save\s*\d+%/i,
-        /^flat\s*\d+%/i,
-        /^\d+%\s*off$/i,
-        /^great\s*indian/i,
-        /^prime\s*(day|deal)/i,
-        /^lightning\s*deal/i,
-        /^deal\s*of\s*the\s*day/i,
-        /^trending\s*(now|deal)/i,
-        /^emerging\s*business/i,
-        /^become\s*a\s*seller/i,
-        /^download\s*app/i,
-        /^free\s*delivery/i,
-        /^no\s*cost\s*emi/i,
-        /^bank\s*offer/i,
-        /^cashback/i,
-        /^[a-z]{1,12}$/i,
-        /^[\d%₹$\s,\.]+$/,
-        /^\s*$/,
-        /^[^a-zA-Z]*$/,
-        /^shop\s*by\s*category/i,
-        /^top\s*categories/i,
-        /^customers\s*also/i,
-        /^you\s*may\s*also/i,
-    ];
+    class SiteConfig {
+        constructor(key, name, category, urlPatterns, selectors) {
+            this.key = key;
+            this.name = name;
+            this.category = category;
+            this.urlPatterns = urlPatterns;
+            this.selectors = selectors;
+        }
+    }
 
-    // ═══════════════════════════════════════════════════════════════
-    // VALIDATION CONFIG
-    // ═══════════════════════════════════════════════════════════════
-    
-    const VALIDATION = {
-        minTitleLength: 20,
-        maxTitleLength: 250,
-        minWords: 3,
-        minScore: 40,
-        minPrice: 50,
-        maxPrice: 10000000
-    };
-
-    // ═══════════════════════════════════════════════════════════════
-    // SITE CONFIGURATIONS
-    // ═══════════════════════════════════════════════════════════════
-    
-    const SiteRegistry = {
-        sites: {
-            amazon: {
-                name: "Amazon",
-                category: "ecommerce",
-                urlPatterns: {
+    class SiteRegistry {
+        static sites = {
+            amazon: new SiteConfig(
+                "amazon",
+                "Amazon",
+                "ecommerce",
+                {
                     search: ['/s?', '/s/', '/s?k='],
                     product: ['/dp/', '/gp/product/'],
                     category: ['/b/', '/b?']
                 },
-                selectors: {
+                {
                     [PageType.SEARCH]: {
-                        containers: [
-                            '[data-component-type="s-search-result"]',
-                            '.s-result-item[data-asin]:not([data-asin=""])'
-                        ],
+                        containers: ['[data-component-type="s-search-result"]', '.s-result-item[data-asin]:not([data-asin=""])'],
                         title: ['h2 a span', 'h2 span', '.a-text-normal'],
                         price: ['.a-price .a-offscreen', '.a-price-whole'],
                         rating: ['.a-icon-star-small .a-icon-alt'],
@@ -158,34 +95,25 @@
                         image: ['#landingImage']
                     },
                     [PageType.HOMEPAGE]: {
-                        containers: [
-                            '[data-asin]:not([data-asin=""])',
-                            '.a-carousel-card',
-                            '.p13n-sc-uncoverable-faceout',
-                            '.feed-carousel-card'
-                        ],
-                        title: [
-                            '.p13n-sc-truncate-desktop-type2',
-                            '.p13n-sc-truncate',
-                            'a[href*="/dp/"] span',
-                            'h2 a span'
-                        ],
+                        containers: ['[data-asin]:not([data-asin=""])', '.a-carousel-card', '.p13n-sc-uncoverable-faceout', '.feed-carousel-card'],
+                        title: ['.p13n-sc-truncate-desktop-type2', '.p13n-sc-truncate', 'a[href*="/dp/"] span', 'h2 a span'],
                         price: ['.a-price .a-offscreen', '.p13n-sc-price'],
                         rating: ['.a-icon-star-small .a-icon-alt'],
                         image: ['img.p13n-product-image', 'img']
                     }
                 }
-            },
+            ),
             
-            flipkart: {
-                name: "Flipkart",
-                category: "ecommerce",
-                urlPatterns: {
+            flipkart: new SiteConfig(
+                "flipkart",
+                "Flipkart",
+                "ecommerce",
+                {
                     search: ['/search?', 'q='],
                     product: ['/p/'],
                     category: ['/store/']
                 },
-                selectors: {
+                {
                     [PageType.SEARCH]: {
                         containers: ['[data-id]', '._1AtVbE', '._2kHMtA'],
                         title: ['._4rR01T', '.s1Q9rs', '.IRpwTa', '.KzDlHZ'],
@@ -208,30 +136,28 @@
                         image: ['._2r_T1I']
                     }
                 }
-            }
-        },
+            )
+        };
         
-        get(hostname) {
+        static get(hostname) {
             const host = hostname.toLowerCase().replace("www.", "");
             for (const [key, config] of Object.entries(this.sites)) {
-                if (host.includes(key)) {
-                    return { key, ...config };
-                }
+                if (host.includes(key)) return config;
             }
             return this.getGeneric();
-        },
+        }
         
-        getGeneric() {
-            return {
-                key: "generic",
-                name: "Website",
-                category: "general",
-                urlPatterns: {
+        static getGeneric() {
+            return new SiteConfig(
+                "generic",
+                "Website",
+                "general",
+                {
                     search: ['search', 'q='],
                     product: ['/product/', '/item/'],
                     category: ['/category/']
                 },
-                selectors: {
+                {
                     [PageType.SEARCH]: {
                         containers: ['article', '.product', '.card'],
                         title: ['h2', 'h3', 'a'],
@@ -247,34 +173,25 @@
                         image: ['img']
                     }
                 }
-            };
+            );
         }
-    };
+    }
 
-    // ═══════════════════════════════════════════════════════════════
-    // PRODUCT VALIDATOR
-    // ═══════════════════════════════════════════════════════════════
-    
     class ProductValidator {
-        
         static isValidProduct(item) {
-            const name = item.name || '';
-            const price = item.price || '';
-            const rating = item.rating || '';
-            
-            const nameCheck = this.isValidName(name);
+            const nameCheck = this.isValidName(item.name || '');
             if (!nameCheck.valid) return nameCheck;
             
-            const hasPrice = this.isValidPrice(price);
-            const hasRating = this.isValidRating(rating);
+            const hasPrice = this.isValidPrice(item.price || '');
+            const hasRating = this.isValidRating(item.rating || '');
             
             if (!hasPrice && !hasRating) {
                 return { valid: false, reason: 'No price or rating' };
             }
             
-            if (price) {
-                const priceValue = this.extractPriceValue(price);
-                if (priceValue > 0 && priceValue < VALIDATION.minPrice) {
+            if (item.price) {
+                const priceValue = this.extractPriceValue(item.price);
+                if (priceValue > 0 && priceValue < Config.VALIDATION.minPrice) {
                     return { valid: false, reason: 'Price too low' };
                 }
             }
@@ -288,28 +205,17 @@
             }
             
             const cleaned = text.trim();
+            const { minTitleLength, maxTitleLength, minWords } = Config.VALIDATION;
             
-            if (cleaned.length < VALIDATION.minTitleLength) {
-                return { valid: false, reason: 'Too short' };
-            }
-            
-            if (cleaned.length > VALIDATION.maxTitleLength) {
-                return { valid: false, reason: 'Too long' };
-            }
-            
-            if (!/[a-zA-Z]/.test(cleaned)) {
-                return { valid: false, reason: 'No letters' };
-            }
+            if (cleaned.length < minTitleLength) return { valid: false, reason: 'Too short' };
+            if (cleaned.length > maxTitleLength) return { valid: false, reason: 'Too long' };
+            if (!/[a-zA-Z]/.test(cleaned)) return { valid: false, reason: 'No letters' };
             
             const words = cleaned.split(/\s+/).filter(w => w.length > 1);
-            if (words.length < VALIDATION.minWords) {
-                return { valid: false, reason: 'Too few words' };
-            }
+            if (words.length < minWords) return { valid: false, reason: 'Too few words' };
             
-            for (const pattern of BLACKLIST_PATTERNS) {
-                if (pattern.test(cleaned)) {
-                    return { valid: false, reason: 'Blacklisted' };
-                }
+            for (const pattern of Config.BLACKLIST_PATTERNS) {
+                if (pattern.test(cleaned)) return { valid: false, reason: 'Blacklisted' };
             }
             
             if (/^\d+%/.test(cleaned) || /^up\s*to/i.test(cleaned)) {
@@ -320,23 +226,14 @@
         }
         
         static isValidPrice(price) {
-            if (!price) return false;
-            if (!/\d/.test(price)) return false;
-            const value = this.extractPriceValue(price);
-            return value >= VALIDATION.minPrice;
+            if (!price || !/\d/.test(price)) return false;
+            return this.extractPriceValue(price) >= Config.VALIDATION.minPrice;
         }
         
         static extractPriceValue(price) {
             if (!price) return 0;
             const match = price.match(/[\d,]+\.?\d*/);
-            if (match) {
-                try {
-                    return parseFloat(match[0].replace(/,/g, ''));
-                } catch (e) {
-                    return 0;
-                }
-            }
-            return 0;
+            return match ? parseFloat(match[0].replace(/,/g, '')) : 0;
         }
         
         static isValidRating(rating) {
@@ -357,22 +254,19 @@
                 if (/[₹$€£]/.test(item.price)) score += 10;
             }
             
-            if (item.rating && this.isValidRating(item.rating)) {
-                score += 30;
-            }
-            
-            if (item.image && item.image.length > 20) {
-                score += 10;
-            }
+            if (item.rating && this.isValidRating(item.rating)) score += 30;
+            if (item.image && item.image.length > 20) score += 10;
             
             if (item.name) {
                 if (item.name.length > 40) score += 10;
                 
-                const brands = /\b(samsung|apple|sony|lg|hp|dell|lenovo|asus|mi|xiaomi|realme|oppo|vivo|oneplus|boat|jbl|philips|bajaj|nike|adidas|puma)\b/i;
-                if (brands.test(item.name)) score += 25;
+                if (/\b(samsung|apple|sony|lg|hp|dell|lenovo|asus|mi|xiaomi|realme|oppo|vivo|oneplus|boat|jbl|philips|bajaj|nike|adidas|puma)\b/i.test(item.name)) {
+                    score += 25;
+                }
                 
-                const products = /\b(phone|mobile|laptop|headphone|earphone|speaker|watch|camera|tv|refrigerator|ac|mixer|microwave|charger|power\s*bank)\b/i;
-                if (products.test(item.name)) score += 20;
+                if (/\b(phone|mobile|laptop|headphone|earphone|speaker|watch|camera|tv|refrigerator|ac|mixer|microwave|charger|power\s*bank)\b/i.test(item.name)) {
+                    score += 20;
+                }
                 
                 if (/\b\d+\s*(gb|tb|mp|mah|w|inch)\b/i.test(item.name)) score += 15;
             }
@@ -381,14 +275,10 @@
         }
     }
 
-    // ═══════════════════════════════════════════════════════════════
-    // CACHE MANAGER
-    // ═══════════════════════════════════════════════════════════════
-    
     class CacheManager {
         constructor() {
             this.store = new Map();
-            this.duration = CONFIG.CACHE_DURATION;
+            this.duration = Config.CACHE_DURATION;
         }
         
         generateKey(query, url) {
@@ -414,10 +304,6 @@
         }
     }
 
-    // ═══════════════════════════════════════════════════════════════
-    // PAGE DETECTOR
-    // ═══════════════════════════════════════════════════════════════
-    
     class PageDetector {
         constructor() {
             this.url = window.location.href.toLowerCase();
@@ -446,15 +332,10 @@
         }
         
         isHomepage() {
-            const path = this.pathname;
-            return path === "/" || path === "" || /^\/?(in|us|uk)?\/?\??$/.test(path);
+            return this.pathname === "/" || this.pathname === "" || /^\/?(in|us|uk)?\/?\??$/.test(this.pathname);
         }
     }
 
-    // ═══════════════════════════════════════════════════════════════
-    // ELEMENT EXTRACTOR
-    // ═══════════════════════════════════════════════════════════════
-    
     class ElementExtractor {
         static extractText(element, selectors, maxLength = 200) {
             if (!element || !selectors) return "";
@@ -501,13 +382,9 @@
         }
     }
 
-    // ═══════════════════════════════════════════════════════════════
-    // PRODUCT SCRAPER
-    // ═══════════════════════════════════════════════════════════════
-    
     class ProductScraper {
         constructor() {
-            this.pageDetector = new PageDetector();
+            this.pageDetector = null;
             this.siteConfig = null;
             this.pageType = null;
             this.selectors = null;
@@ -534,9 +411,7 @@
         scrape() {
             this.initialize();
             
-            if (!this.selectors) {
-                return this.createResult([]);
-            }
+            if (!this.selectors) return this.createResult([]);
             
             const items = this.extractItems();
             const validated = this.validateItems(items);
@@ -544,9 +419,7 @@
             
             if (unique.length === 0) {
                 const altItems = this.alternativeScrape();
-                if (altItems.length > 0) {
-                    return this.createResult(altItems);
-                }
+                if (altItems.length > 0) return this.createResult(altItems);
             }
             
             return this.createResult(unique);
@@ -589,7 +462,7 @@
                 if (!check.valid) continue;
                 
                 const score = ProductValidator.scoreProduct(item);
-                if (score < VALIDATION.minScore) continue;
+                if (score < Config.VALIDATION.minScore) continue;
                 
                 item._score = score;
                 validated.push(item);
@@ -603,7 +476,7 @@
             const productLinks = document.querySelectorAll('a[href*="/dp/"]');
             const seenAsins = new Set();
             
-            productLinks.forEach((link, i) => {
+            productLinks.forEach((link) => {
                 const asinMatch = link.href.match(/\/dp\/([A-Z0-9]{10})/);
                 if (!asinMatch) return;
                 
@@ -643,7 +516,7 @@
                 };
                 
                 const score = ProductValidator.scoreProduct(item);
-                if (score >= VALIDATION.minScore) {
+                if (score >= Config.VALIDATION.minScore) {
                     item._score = score;
                     items.push(item);
                 }
@@ -667,7 +540,7 @@
                 }
             }
             
-            return unique.slice(0, CONFIG.MAX_ITEMS);
+            return unique.slice(0, Config.MAX_ITEMS);
         }
         
         createResult(items) {
@@ -687,19 +560,15 @@
                 meta: {
                     count: items.length,
                     timestamp: new Date().toISOString(),
-                    version: CONFIG.VERSION
+                    version: Config.VERSION
                 }
             };
         }
     }
 
-    // ═══════════════════════════════════════════════════════════════
-    // API CLIENT
-    // ═══════════════════════════════════════════════════════════════
-    
     class APIClient {
         constructor() {
-            this.baseUrl = CONFIG.API_URL;
+            this.baseUrl = Config.API_URL;
             this.timeout = 30000;
         }
         
@@ -739,36 +608,18 @@
         }
     }
 
-    // ═══════════════════════════════════════════════════════════════
-    // UI MANAGER - Clean macOS Light Style (White Focus) - RESPONSIVE
-    // ═══════════════════════════════════════════════════════════════
-    
-    class UIManager {
-        constructor() {
-            this.isOpen = false;
-            this.isLoading = false;
-            this.elements = {};
-            this.cache = new CacheManager();
-            this.api = new APIClient();
-            this.scraper = new ProductScraper();
-            this.currentData = null;
-            
-            this.init();
-        }
-        
-        init() {
-            this.injectStyles();
-            this.createBubble();
-            this.createWindow();
-            this.bindEvents();
-        }
-        
-        injectStyles() {
+    class StyleManager {
+        static inject() {
             if (document.getElementById("sb-styles")) return;
             
             const style = document.createElement("style");
             style.id = "sb-styles";
-            style.textContent = `
+            style.textContent = this.getStyles();
+            document.head.appendChild(style);
+        }
+        
+        static getStyles() {
+            return `
                 :root {
                     --sb-bg-primary: rgba(255, 255, 255, 0.85);
                     --sb-bg-secondary: rgba(249, 249, 251, 0.95);
@@ -792,9 +643,7 @@
                     --sb-radius-sm: 8px;
                 }
                 
-                * {
-                    box-sizing: border-box;
-                }
+                * { box-sizing: border-box; }
                 
                 #sb-bubble {
                     position: fixed;
@@ -808,8 +657,7 @@
                     align-items: center;
                     justify-content: center;
                     cursor: pointer;
-                    box-shadow: 0 4px 16px rgba(0, 122, 255, 0.3), 
-                                0 2px 8px rgba(0, 0, 0, 0.15);
+                    box-shadow: 0 4px 16px rgba(0, 122, 255, 0.3), 0 2px 8px rgba(0, 0, 0, 0.15);
                     z-index: 2147483646;
                     transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
                     border: none;
@@ -818,13 +666,10 @@
                 
                 #sb-bubble:hover {
                     transform: scale(1.1);
-                    box-shadow: 0 6px 24px rgba(0, 122, 255, 0.4),
-                                0 4px 12px rgba(0, 0, 0, 0.2);
+                    box-shadow: 0 6px 24px rgba(0, 122, 255, 0.4), 0 4px 12px rgba(0, 0, 0, 0.2);
                 }
                 
-                #sb-bubble:active {
-                    transform: scale(0.98);
-                }
+                #sb-bubble:active { transform: scale(0.98); }
                 
                 #sb-bubble svg {
                     width: 26px;
@@ -833,7 +678,6 @@
                     filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.1));
                 }
                 
-                /* RESPONSIVE CHATBOX */
                 #sb-window {
                     position: fixed;
                     bottom: 86px;
@@ -859,7 +703,6 @@
                     -moz-osx-font-smoothing: grayscale;
                 }
                 
-                /* Mobile adjustments */
                 @media (max-width: 640px) {
                     #sb-bubble {
                         width: 52px;
@@ -883,7 +726,6 @@
                     }
                 }
                 
-                /* Small mobile screens */
                 @media (max-width: 400px) {
                     #sb-window {
                         bottom: 78px;
@@ -951,9 +793,7 @@
                     transform: scale(1.1);
                 }
                 
-                .sb-traffic button:active {
-                    transform: scale(0.95);
-                }
+                .sb-traffic button:active { transform: scale(0.95); }
                 
                 .sb-traffic-close {
                     background: #ff5f56;
@@ -998,13 +838,8 @@
                 }
                 
                 @media (max-width: 640px) {
-                    .sb-title-text {
-                        font-size: 13px;
-                    }
-                    
-                    .sb-title-subtitle {
-                        font-size: 10px;
-                    }
+                    .sb-title-text { font-size: 13px; }
+                    .sb-title-subtitle { font-size: 10px; }
                 }
                 
                 .sb-title-actions {
@@ -1040,9 +875,7 @@
                     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
                 }
                 
-                .sb-action-btn:active {
-                    transform: scale(0.96);
-                }
+                .sb-action-btn:active { transform: scale(0.96); }
                 
                 .sb-action-btn svg {
                     width: 16px;
@@ -1071,21 +904,14 @@
                     }
                 }
                 
-                .sb-messages::-webkit-scrollbar {
-                    width: 6px;
-                }
-                
-                .sb-messages::-webkit-scrollbar-track {
-                    background: transparent;
-                }
-                
+                .sb-messages::-webkit-scrollbar { width: 6px; }
+                .sb-messages::-webkit-scrollbar-track { background: transparent; }
                 .sb-messages::-webkit-scrollbar-thumb {
                     background: rgba(0, 0, 0, 0.15);
                     border-radius: 3px;
                     border: 1px solid transparent;
                     background-clip: padding-box;
                 }
-                
                 .sb-messages::-webkit-scrollbar-thumb:hover {
                     background: rgba(0, 0, 0, 0.25);
                     background-clip: padding-box;
@@ -1156,9 +982,7 @@
                 }
                 
                 @media (max-width: 640px) {
-                    .sb-card-header {
-                        padding: 12px 14px;
-                    }
+                    .sb-card-header { padding: 12px 14px; }
                 }
                 
                 .sb-card-icon {
@@ -1189,9 +1013,7 @@
                 }
                 
                 @media (max-width: 640px) {
-                    .sb-card-title {
-                        font-size: 13px;
-                    }
+                    .sb-card-title { font-size: 13px; }
                 }
                 
                 .sb-card-body {
@@ -1200,9 +1022,7 @@
                 }
                 
                 @media (max-width: 640px) {
-                    .sb-card-body {
-                        padding: 12px 14px;
-                    }
+                    .sb-card-body { padding: 12px 14px; }
                 }
                 
                 .sb-card-row {
@@ -1213,9 +1033,7 @@
                     gap: 10px;
                 }
                 
-                .sb-card-row:not(:last-child) {
-                    border-bottom: 1px solid var(--sb-border-light);
-                }
+                .sb-card-row:not(:last-child) { border-bottom: 1px solid var(--sb-border-light); }
                 
                 .sb-card-label {
                     color: var(--sb-text-secondary);
@@ -1233,9 +1051,7 @@
                 
                 @media (max-width: 640px) {
                     .sb-card-label,
-                    .sb-card-value {
-                        font-size: 12px;
-                    }
+                    .sb-card-value { font-size: 12px; }
                 }
                 
                 .sb-badge {
@@ -1266,9 +1082,7 @@
                     }
                 }
                 
-                .sb-card-footer.warning {
-                    background: rgba(255, 149, 0, 0.08);
-                }
+                .sb-card-footer.warning { background: rgba(255, 149, 0, 0.08); }
                 
                 .sb-quick-actions {
                     padding: 10px 14px;
@@ -1317,9 +1131,7 @@
                     transform: translateY(-1px);
                 }
                 
-                .sb-quick-btn:active {
-                    transform: translateY(0);
-                }
+                .sb-quick-btn:active { transform: translateY(0); }
                 
                 .sb-input-area {
                     padding: 12px 14px;
@@ -1361,13 +1173,10 @@
                 
                 .sb-input:focus {
                     border-color: var(--sb-accent);
-                    box-shadow: 0 0 0 3px var(--sb-accent-light),
-                                0 1px 3px rgba(0, 0, 0, 0.05);
+                    box-shadow: 0 0 0 3px var(--sb-accent-light), 0 1px 3px rgba(0, 0, 0, 0.05);
                 }
                 
-                .sb-input::placeholder {
-                    color: var(--sb-text-tertiary);
-                }
+                .sb-input::placeholder { color: var(--sb-text-tertiary); }
                 
                 .sb-input:disabled {
                     opacity: 0.5;
@@ -1404,10 +1213,7 @@
                     transform: translateY(-1px);
                 }
                 
-                .sb-send-btn:active:not(:disabled) {
-                    transform: scale(0.96);
-                }
-                
+                .sb-send-btn:active:not(:disabled) { transform: scale(0.96); }
                 .sb-send-btn:disabled {
                     opacity: 0.5;
                     cursor: not-allowed;
@@ -1428,13 +1234,8 @@
                     }
                 }
                 
-                .sb-spinner {
-                    animation: sb-spin 0.8s linear infinite;
-                }
-                
-                @keyframes sb-spin {
-                    to { transform: rotate(360deg); }
-                }
+                .sb-spinner { animation: sb-spin 0.8s linear infinite; }
+                @keyframes sb-spin { to { transform: rotate(360deg); } }
                 
                 .sb-typing {
                     display: flex;
@@ -1449,9 +1250,7 @@
                 }
                 
                 @media (max-width: 640px) {
-                    .sb-typing {
-                        padding: 12px 16px;
-                    }
+                    .sb-typing { padding: 12px 16px; }
                 }
                 
                 .sb-typing span {
@@ -1466,13 +1265,13 @@
                 .sb-typing span:nth-child(2) { animation-delay: -0.16s; }
                 
                 @keyframes sb-typing-dot {
-                    0%, 80%, 100% { 
-                        transform: scale(0.5); 
-                        opacity: 0.5; 
+                    0%, 80%, 100% {
+                        transform: scale(0.5);
+                        opacity: 0.5;
                     }
-                    40% { 
-                        transform: scale(1); 
-                        opacity: 1; 
+                    40% {
+                        transform: scale(1);
+                        opacity: 1;
                     }
                 }
                 
@@ -1495,12 +1294,29 @@
                     padding-left: 20px;
                 }
                 
-                .sb-message li {
-                    margin: 5px 0;
-                }
+                .sb-message li { margin: 5px 0; }
             `;
+        }
+    }
+
+    class UIManager {
+        constructor() {
+            this.isOpen = false;
+            this.isLoading = false;
+            this.elements = {};
+            this.cache = new CacheManager();
+            this.api = new APIClient();
+            this.scraper = new ProductScraper();
+            this.currentData = null;
             
-            document.head.appendChild(style);
+            this.init();
+        }
+        
+        init() {
+            StyleManager.inject();
+            this.createBubble();
+            this.createWindow();
+            this.bindEvents();
         }
         
         createBubble() {
@@ -1588,7 +1404,7 @@
             
             this.elements.actions.addEventListener("click", (e) => {
                 const btn = e.target.closest(".sb-quick-btn");
-                if (btn && btn.dataset.cmd) {
+                if (btn?.dataset.cmd) {
                     this.elements.input.value = btn.dataset.cmd;
                     this.send();
                 }
@@ -1665,104 +1481,88 @@
             
             actions.push({ label: "Help", cmd: "help" });
             
-            this.elements.actions.innerHTML = actions.map(a => 
-                `<button class="sb-quick-btn" data-cmd="${a.cmd}">${a.label}</button>`
-            ).join("");
+            this.elements.actions.innerHTML = actions
+                .map(a => `<button class="sb-quick-btn" data-cmd="${a.cmd}">${a.label}</button>`)
+                .join("");
         }
         
         showWelcome() {
             if (!this.currentData) return;
             
             const { site, page, meta } = this.currentData;
-            
             let content = '';
             
             if (page.type === PageType.HOMEPAGE && meta.count === 0) {
-                content = `
-                    <div class="sb-card">
-                        <div class="sb-card-header">
-                            <div class="sb-card-icon">
-                                <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
-                            </div>
-                            <span class="sb-card-title">Welcome</span>
-                        </div>
-                        <div class="sb-card-body">
-                            <div class="sb-card-row">
-                                <span class="sb-card-label">Site</span>
-                                <span class="sb-card-value">${site.name}</span>
-                            </div>
-                            <div class="sb-card-row">
-                                <span class="sb-card-label">Page</span>
-                                <span class="sb-card-value">Homepage</span>
-                            </div>
-                        </div>
-                        <div class="sb-card-footer">
-                            Search for products to get personalized recommendations
-                        </div>
-                    </div>
-                `;
+                content = this.buildCard({
+                    icon: '<path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/>',
+                    title: 'Welcome',
+                    rows: [
+                        { label: 'Site', value: site.name },
+                        { label: 'Page', value: 'Homepage' }
+                    ],
+                    footer: 'Search for products to get personalized recommendations'
+                });
             } else if (page.type === PageType.PRODUCT) {
                 const product = this.currentData.items[0];
-                content = `
-                    <div class="sb-card">
-                        <div class="sb-card-header">
-                            <div class="sb-card-icon">
-                                <svg viewBox="0 0 24 24"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>
-                            </div>
-                            <span class="sb-card-title">Product Page</span>
-                        </div>
-                        <div class="sb-card-body">
-                            ${product ? `
-                                <div class="sb-card-row">
-                                    <span class="sb-card-label">Product</span>
-                                    <span class="sb-card-value">${product.name.slice(0, 40)}...</span>
-                                </div>
-                                ${product.price ? `
-                                <div class="sb-card-row">
-                                    <span class="sb-card-label">Price</span>
-                                    <span class="sb-card-value" style="color: var(--sb-green)">${product.price}</span>
-                                </div>
-                                ` : ''}
-                            ` : '<p style="color: var(--sb-text-secondary)">Product details not available</p>'}
-                        </div>
-                        <div class="sb-card-footer">
-                            Ask me anything about this product
-                        </div>
-                    </div>
-                `;
+                const rows = product ? [
+                    { label: 'Product', value: product.name.slice(0, 40) + '...' },
+                    ...(product.price ? [{ label: 'Price', value: product.price, valueStyle: 'color: var(--sb-green)' }] : [])
+                ] : [];
+                
+                content = this.buildCard({
+                    icon: '<path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/>',
+                    title: 'Product Page',
+                    rows: rows,
+                    footer: 'Ask me anything about this product'
+                });
             } else {
-                content = `
-                    <div class="sb-card">
-                        <div class="sb-card-header">
-                            <div class="sb-card-icon">
-                                <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
-                            </div>
-                            <span class="sb-card-title">Ready to Help</span>
-                        </div>
-                        <div class="sb-card-body">
-                            <div class="sb-card-row">
-                                <span class="sb-card-label">Site</span>
-                                <span class="sb-card-value">${site.name}</span>
-                            </div>
-                            <div class="sb-card-row">
-                                <span class="sb-card-label">Products Found</span>
-                                <span class="sb-badge">${meta.count}</span>
-                            </div>
-                        </div>
-                        ${meta.count > 0 ? `
-                            <div class="sb-card-footer">
-                                Ask me to find deals, compare items, or get recommendations
-                            </div>
-                        ` : `
-                            <div class="sb-card-footer warning">
-                                No products found. Try scrolling down or searching for something
-                            </div>
-                        `}
-                    </div>
-                `;
+                content = this.buildCard({
+                    icon: '<circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>',
+                    title: 'Ready to Help',
+                    rows: [
+                        { label: 'Site', value: site.name },
+                        { label: 'Products Found', value: meta.count, badge: true }
+                    ],
+                    footer: meta.count > 0 
+                        ? 'Ask me to find deals, compare items, or get recommendations'
+                        : 'No products found. Try scrolling down or searching for something',
+                    footerWarning: meta.count === 0
+                });
             }
             
             this.addMessage(content, "bot");
+        }
+        
+        buildCard({ icon, title, rows, footer, footerWarning = false }) {
+            const rowsHtml = rows.map(row => {
+                if (row.badge) {
+                    return `
+                        <div class="sb-card-row">
+                            <span class="sb-card-label">${row.label}</span>
+                            <span class="sb-badge">${row.value}</span>
+                        </div>
+                    `;
+                }
+                return `
+                    <div class="sb-card-row">
+                        <span class="sb-card-label">${row.label}</span>
+                        <span class="sb-card-value" ${row.valueStyle ? `style="${row.valueStyle}"` : ''}>${row.value}</span>
+                    </div>
+                `;
+            }).join('');
+            
+            return `
+                <div class="sb-card">
+                    <div class="sb-card-header">
+                        <div class="sb-card-icon">
+                            <svg viewBox="0 0 24 24">${icon}</svg>
+                        </div>
+                        <span class="sb-card-title">${title}</span>
+                    </div>
+                    <div class="sb-card-body">${rowsHtml}</div>
+                    ${footer ? `<div class="sb-card-footer ${footerWarning ? 'warning' : ''}">${footer}</div>` : ''}
+                </div>
+            `;
         }
         
         addMessage(content, type = "bot") {
@@ -1799,8 +1599,7 @@
         }
         
         hideTyping() {
-            const el = document.getElementById("sb-typing");
-            if (el) el.remove();
+            document.getElementById("sb-typing")?.remove();
         }
         
         setLoading(loading) {
@@ -1847,21 +1646,13 @@
                 
             } catch (error) {
                 this.hideTyping();
-                this.addMessage(`
-                    <div class="sb-card">
-                        <div class="sb-card-header">
-                            <div class="sb-card-icon" style="background: linear-gradient(135deg, var(--sb-red) 0%, #d32f2f 100%)">
-                                <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-                            </div>
-                            <span class="sb-card-title">Connection Error</span>
-                        </div>
-                        <div class="sb-card-body">
-                            <p style="color: var(--sb-text-secondary); margin: 0;">
-                                Unable to connect to the server. Please make sure the backend is running.
-                            </p>
-                        </div>
-                    </div>
-                `, "bot");
+                this.addMessage(this.buildCard({
+                    icon: '<circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>',
+                    title: 'Connection Error',
+                    rows: [],
+                    footer: 'Unable to connect to the server. Please make sure the backend is running.',
+                    footerWarning: true
+                }), "bot");
             }
             
             this.setLoading(false);
@@ -1869,10 +1660,6 @@
         }
     }
 
-    // ═══════════════════════════════════════════════════════════════
-    // INITIALIZE
-    // ═══════════════════════════════════════════════════════════════
-    
     window.ShopBuddy = new UIManager();
     
 })();
